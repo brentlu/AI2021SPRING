@@ -87,17 +87,157 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    class dfsNode:
+        def __init__(self, state, parent=None, action=None):
+            self.state = state
+            self.parent = parent
+            self.action = action
+
+        def backtrace(self):
+            solution = list()
+            node = self
+
+            while node.parent != None:
+                solution.insert(0, node.action)
+                node = node.parent
+
+            return solution
+
+    state = problem.getStartState()
+    if problem.isGoalState(state): # already there
+        return []
+
+    stack = util.Stack()
+    visited = set()
+
+    stack.push(dfsNode(state))
+
+    while stack.isEmpty() == False:
+        node = stack.pop()
+
+        if problem.isGoalState(node.state):
+            return node.backtrace()
+
+        #print('visit %s' % (str(node.state)))
+        visited.add(node.state)
+        for successor, action, stepCost in problem.getSuccessors(node.state):
+            if successor not in visited:
+                #print('  successor %s, action %s, stepCost %s' % (str(successor), str(action), str(stepCost)))
+                stack.push(dfsNode(successor, node, action))
+            else:
+                #print('  redundant %s' % (str(successor)))
+                pass
+
+    # oops, find no path...
+    return []
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    class bfsNode:
+        def __init__(self, state, parent=None, action=None):
+            self.state = state
+            self.parent = parent
+            self.action = action
+
+        def backtrace(self):
+            solution = list()
+            node = self
+
+            while node.parent != None:
+                solution.insert(0, node.action)
+                node = node.parent
+
+            return solution
+
+    state = problem.getStartState()
+    if problem.isGoalState(state): # already there
+        return []
+
+    queue = util.Queue()
+    visited = set()
+
+    queue.push(bfsNode(state))
+
+    while queue.isEmpty() == False:
+        node = queue.pop()
+
+        if problem.isGoalState(node.state):
+            return node.backtrace()
+
+        # bfs needs this to overcome loop
+        if node.state in visited:
+            continue
+
+        #print('visit %s' % (str(node.state)))
+        visited.add(node.state)
+        for successor, action, stepCost in problem.getSuccessors(node.state):
+            if successor not in visited:
+                #print('  successor %s, action %s, stepCost %s' % (str(successor), str(action), str(stepCost)))
+                queue.push(bfsNode(successor, node, action))
+            else:
+                #print('  redundant %s' % (str(successor)))
+                pass
+
+    # oops, find no path...
+    return []
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    class ufsNode:
+        def __init__(self, state, parent=None, action=None, cost=0):
+            self.state = state
+            self.parent = parent
+            self.action = action
+            self.cost = cost
+
+            if parent != None:
+                self.cost += parent.cost
+
+        def backtrace(self):
+            solution = list()
+            node = self
+
+            while node.parent != None:
+                solution.insert(0, node.action)
+                node = node.parent
+
+            return solution
+
+    state = problem.getStartState()
+    if problem.isGoalState(state): # already there
+        return []
+
+    queue = util.PriorityQueue()
+    visited = set()
+
+    root = ufsNode(state)
+    queue.update(root, root.cost)
+
+    while queue.isEmpty() == False:
+        node = queue.pop()
+
+        if problem.isGoalState(node.state):
+            return node.backtrace()
+
+        # bfs needs this to overcome loop
+        if node.state in visited:
+            continue
+
+        #print('visit %s' % (str(node.state)))
+        visited.add(node.state)
+        for successor, action, stepCost in problem.getSuccessors(node.state):
+            if successor not in visited:
+                #print('  successor %s, action %s, stepCost %s' % (str(successor), str(action), str(stepCost)))
+                child = ufsNode(successor, node, action, stepCost)
+                queue.update(child, child.cost)
+            else:
+                #print('  redundant %s' % (str(successor)))
+                pass
+
+    # oops, find no path...
+    return []
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,7 +249,59 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    class astarNode:
+        def __init__(self, state, parent=None, action=None, cost=0):
+            self.state = state
+            self.parent = parent
+            self.action = action
+            self.cost = cost
+
+            if parent != None:
+                self.cost += parent.cost
+
+        def backtrace(self):
+            solution = list()
+            node = self
+
+            while node.parent != None:
+                solution.insert(0, node.action)
+                node = node.parent
+
+            return solution
+
+    state = problem.getStartState()
+    if problem.isGoalState(state): # already there
+        return []
+
+    queue = util.PriorityQueue()
+    visited = set()
+
+    root = astarNode(state)
+    queue.update(root, root.cost + heuristic(root.state, problem))
+
+    while queue.isEmpty() == False:
+        node = queue.pop()
+
+        if problem.isGoalState(node.state):
+            return node.backtrace()
+
+        # bfs needs this to overcome loop
+        if node.state in visited:
+            continue
+
+        #print('visit %s' % (str(node.state)))
+        visited.add(node.state)
+        for successor, action, stepCost in problem.getSuccessors(node.state):
+            if successor not in visited:
+                #print('  successor %s, action %s, stepCost %s' % (str(successor), str(action), str(stepCost)))
+                child = astarNode(successor, node, action, stepCost)
+                queue.update(child, child.cost + heuristic(child.state, problem))
+            else:
+                #print('  redundant %s' % (str(successor)))
+                pass
+
+    # oops, find no path...
+    return []
 
 
 # Abbreviations
